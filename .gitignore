@@ -44,3 +44,4 @@ __screenshots__/
 Thumbs.db
 /frontend/.vscode/
 /frontend/node_modules/
+/.idea/
