@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService, User } from '../../../services/user.service';
@@ -10,10 +10,6 @@ import { Subscription, filter } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="d-flex align-items-center mb-4">
-      <h2>Пользователи</h2>
-    </div>
-
     <div class="card mb-4 shadow-sm">
       <div class="card-body">
         <h5 class="card-title">Новый пользователь</h5>
@@ -68,6 +64,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   private navigationSub?: Subscription;
 
@@ -93,7 +90,10 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   loadUsers() {
-    this.userService.getUsers().subscribe(users => this.users = users);
+    this.userService.getUsers().subscribe(users => {
+      this.users = users;
+      this.cdr.detectChanges();
+    });
   }
 
   onCreate() {
