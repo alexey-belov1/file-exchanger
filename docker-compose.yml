@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: file_exchanger_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fileexchanger
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio
+    container_name: file_exchanger_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+    container_name: file_exchanger_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=fileexchanger
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET=file-exchanger
+      - S3_REGION=us-east-1
+      - JWT_SECRET=8a2718e2b83ef3083e954556b6a2b8e390c50f806ffad5ed703a830847996c5e
+    depends_on:
+      - db
+      - minio
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: file_exchanger_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+  miniodata:
+
+networks:
+  app-network:
+    driver: bridge
