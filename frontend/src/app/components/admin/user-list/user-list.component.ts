@@ -1,21 +1,20 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService, User } from '../../../services/user.service';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center mb-4">
       <h2>Пользователи</h2>
-      <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
-        {{ showCreateForm ? 'Отмена' : 'Добавить пользователя' }}
-      </button>
     </div>
 
-    <div class="card mb-4 shadow-sm" *ngIf="showCreateForm">
+    <div class="card mb-4 shadow-sm">
       <div class="card-body">
         <h5 class="card-title">Новый пользователь</h5>
         <form [formGroup]="createForm" (ngSubmit)="onCreate()">
@@ -65,12 +64,14 @@ import { UserService, User } from '../../../services/user.service';
     </table>
   `
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
+
+  private navigationSub?: Subscription;
 
   users: User[] = [];
-  showCreateForm = false;
   loading = false;
 
   createForm = this.fb.group({
@@ -81,6 +82,14 @@ export class UserListComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+    this.navigationSub = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        const url = (event as NavigationEnd).urlAfterRedirects;
+        if (url.startsWith('/admin/users')) {
+          this.loadUsers();
+        }
+      });
   }
 
   loadUsers() {
@@ -94,7 +103,6 @@ export class UserListComponent implements OnInit {
         next: () => {
           this.loadUsers();
           this.createForm.reset({ role: 'ROLE_USER' });
-          this.showCreateForm = false;
           this.loading = false;
         },
         error: () => {
@@ -103,6 +111,10 @@ export class UserListComponent implements OnInit {
         }
       });
     }
+  }
+
+  ngOnDestroy() {
+    this.navigationSub?.unsubscribe();
   }
 
   deleteUser(id: string) {

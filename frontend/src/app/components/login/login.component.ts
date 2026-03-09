@@ -10,26 +10,24 @@ import { AuthService } from '../../services/auth.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title text-center mb-4">Авторизация</h3>
-              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-                <div class="mb-3">
-                  <label for="username" class="form-label">Имя пользователя</label>
-                  <input type="text" id="username" class="form-control" formControlName="username">
-                </div>
-                <div class="mb-3">
-                  <label for="password" class="form-label">Пароль</label>
-                  <input type="password" id="password" class="form-control" formControlName="password">
-                </div>
-                <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-                <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || loading">
-                  Войти
-                </button>
-              </form>
-            </div>
+      <div class="auth-card-wrapper">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-4">Авторизация</h3>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label for="username" class="form-label">Имя пользователя</label>
+                <input type="text" id="username" class="form-control" formControlName="username">
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" id="password" class="form-control" formControlName="password">
+              </div>
+              <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+              <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || loading">
+                Войти
+              </button>
+            </form>
           </div>
         </div>
       </div>

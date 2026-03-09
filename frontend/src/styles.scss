@@ -198,6 +198,57 @@ app-root {
   margin-right: 0.5rem;
 }
 
+.ms-auto {
+  margin-left: auto;
+}
+
+.navbar {
+  background: rgba(15, 23, 42, 0.96);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  color: #e5e7eb;
+  margin-right: 1.75rem;
+  text-decoration: none;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  position: relative;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
+}
+
+.nav-link:hover {
+  background: rgba(31, 41, 55, 0.9);
+  color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  background: var(--accent-soft);
+  color: #e5e7eb;
+}
+
 .card {
   background: radial-gradient(circle at top left, #1f2937 0, #020617 80%);
   border-radius: var(--radius-lg);
@@ -214,6 +265,11 @@ app-root {
   margin: 0 0 1.25rem;
   font-size: 1.25rem;
   font-weight: 600;
+}
+
+.auth-card-wrapper {
+  max-width: 360px;
+  margin: 0 auto;
 }
 
 input.form-control,

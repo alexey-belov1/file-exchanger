@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
+import { API_BASE_URL } from '../config/api.config';
 
 export interface AuthResponse {
   token: string;
@@ -15,7 +16,7 @@ export interface AuthResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = '/api/auth';
+  private apiUrl = `${API_BASE_URL}/api/auth`;
   
   currentUser = signal<{username: string, roles: string[]} | null>(null);
 

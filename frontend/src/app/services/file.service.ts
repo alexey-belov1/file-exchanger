@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../config/api.config';
 
 export interface FileItem {
   id: string;
@@ -16,7 +17,7 @@ export interface FileItem {
   providedIn: 'root'
 })
 export class FileService {
-  private apiUrl = '/api/files';
+  private apiUrl = `${API_BASE_URL}/api/files`;
 
   constructor(private http: HttpClient) {}
 

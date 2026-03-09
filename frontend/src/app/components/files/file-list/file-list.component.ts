@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FileService, FileItem } from '../../../services/file.service';
@@ -9,14 +9,8 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Файлы</h2>
-      <button class="btn btn-primary" (click)="showUploadForm = !showUploadForm">
-        {{ showUploadForm ? 'Отмена' : 'Загрузить файл' }}
-      </button>
-    </div>
 
-    <div class="card mb-4 shadow-sm" *ngIf="showUploadForm">
+    <div class="card mb-4 shadow-sm">
       <div class="card-body">
         <h5 class="card-title">Загрузка файла</h5>
         <div class="row align-items-end">
@@ -56,7 +50,7 @@ import { AuthService } from '../../../services/auth.service';
           <td>{{ file.uploadedAt | date:'short' }}</td>
           <td [class.text-danger]="isExpiringSoon(file.expiresAt)">{{ file.expiresAt | date:'short' }}</td>
           <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary me-2" (click)="download(file.id)">Скачать</button>
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="download(file)">Скачать</button>
             <button class="btn btn-sm btn-outline-danger" (click)="deleteFile(file.id)">Удалить</button>
           </td>
         </tr>
@@ -70,9 +64,9 @@ import { AuthService } from '../../../services/auth.service';
 export class FileListComponent implements OnInit {
   private fileService = inject(FileService);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   files: FileItem[] = [];
-  showUploadForm = false;
   selectedFile: File | null = null;
   retentionMinutes: number | null = null;
   uploading = false;
@@ -84,7 +78,10 @@ export class FileListComponent implements OnInit {
   }
 
   loadFiles() {
-    this.fileService.getFiles().subscribe(files => this.files = files);
+    this.fileService.getFiles().subscribe(files => {
+      this.files = files;
+      this.cdr.detectChanges();
+    });
   }
 
   onFileSelected(event: any) {
@@ -99,7 +96,6 @@ export class FileListComponent implements OnInit {
         this.loadFiles();
         this.selectedFile = null;
         this.retentionMinutes = null;
-        this.showUploadForm = false;
         this.uploading = false;
       },
       error: () => {
@@ -109,29 +105,21 @@ export class FileListComponent implements OnInit {
     });
   }
 
-  download(id: string) {
+  download(file: FileItem) {
     const token = localStorage.getItem('token');
-    fetch(this.fileService.downloadUrl(id), {
+    fetch(this.fileService.downloadUrl(file.id), {
       headers: { 'Authorization': 'Bearer ' + token }
     })
     .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = 'downloaded_file';
-        if (contentDisposition) {
-            const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-            if (filenameMatch && filenameMatch.length === 2) {
-                filename = decodeURIComponent(filenameMatch[1]);
-            }
-        }
-        return response.blob().then(blob => ({ blob, filename }));
+        return response.blob();
     })
-    .then(({blob, filename}) => {
+    .then((blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = filename;
+        a.download = file.originalName;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
